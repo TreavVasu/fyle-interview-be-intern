@@ -51,7 +51,6 @@ class Assignment(db.Model):
             assertions.assert_found(assignment, 'No assignment with this id was found')
             assertions.assert_valid(assignment.state == AssignmentStateEnum.DRAFT,
                                     'only assignment in draft state can be edited')
-
             assignment.content = assignment_new.content
         else:
             assignment = assignment_new
@@ -87,13 +86,10 @@ class Assignment(db.Model):
     def gradeAssignment(cls,_id,grade,principal: Principal):
         assignment = Assignment.get_by_id(_id)
         assertions.assert_found(assignment, 'No assignment with this id was found')
-        assertions.assert_valid(assignment.state == AssignmentStateEnum.SUBMITTED,
-                                'only a submitted assignment can be graded')
-
-        assertions.assert_auth(principal.teacher_id, 'Only teachers are allowed to grade')
-        assertions.assert_auth(principal.teacher_id, 'Only teachers are allowed to grade')        
+        assertions.assert_valid(assignment.state == AssignmentStateEnum.SUBMITTED,'only a submitted assignment can be graded')
         assertions.assert_valid(assignment.content is not None, 'assignment with empty content cannot be graded')
         assertions.assert_valid(assignment.teacher_id == principal.teacher_id, 'This assignment belongs to some other teacher')
+        assertions.assert_auth(principal.teacher_id, 'Only teachers are allowed to grade')
 
         if grade not in [gcheck for gcheck, member in GradeEnum.__members__.items()]:
             raise ValidationError("Only enum values are allowed to grade.")
