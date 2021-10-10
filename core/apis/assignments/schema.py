@@ -24,7 +24,6 @@ class AssignmentSchema(SQLAlchemyAutoSchema):
         # pylint: disable=unused-argument,no-self-use
         return Assignment(**data_dict)
 
-
 class AssignmentSubmitSchema(Schema):
     class Meta:
         unknown = EXCLUDE
