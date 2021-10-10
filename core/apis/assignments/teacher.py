@@ -2,9 +2,11 @@ from flask import Blueprint
 from core import db
 from core.apis import decorators
 from core.apis.responses import APIResponse
-from core.models.assignments import Assignment
+from core.models.assignments import Assignment, AssignmentStateEnum
 
-from .schema import AssignmentSchema, AssignmentGradeSchema
+from .schema import AssignmentSchema
+from marshmallow import ValidationError
+from core.libs.exceptions import FyleError
 
 teacher_assignment_resource = Blueprint('teacher_assignments_resources', __name__)
 
@@ -23,13 +25,30 @@ def list_Allassignments(p):
 @decorators.auth_principal
 def submit_assignment(p, incoming_payload):
     """Grade an assignment"""
-    grade_assignment_payload = AssignmentGradeSchema().load(incoming_payload)
+    grade_assignment_payload = Assignment.get_by_id(incoming_payload['id'])
 
-    grade_assignment = Assignment.gradeAssignment(
-        _id=grade_assignment_payload.id,
-        grade=grade_assignment_payload.grade,
-        principal=p
-    )
+    if not isinstance(incoming_payload['id'],int):
+        raise ValidationError("Not a valid id")
+
+    if grade_assignment_payload is None: 
+       raise FyleError(404, "FyleError")
+
+
+    gradeResponse = incoming_payload['grade']
+    grade_list = ["A", "B", "C", "D"] 
+    if gradeResponse not in grade_list:
+        raise ValidationError(404, "ValidationError") 
+    else:
+        grade_assignment_payload.grade = gradeResponse
+
+    if grade_assignment_payload.teacher_id != p.teacher_id: 
+       raise FyleError(400, "FyleError")
+
+    if grade_assignment_payload.state != "SUBMITTED":
+       raise FyleError(400, "FyleError")
+    
+    grade_assignment_payload.state = AssignmentStateEnum.GRADED
+
     db.session.commit()
-    grade_assignment_dump = AssignmentSchema().dump(grade_assignment)
+    grade_assignment_dump = AssignmentSchema().dump(grade_assignment_payload)
     return APIResponse.respond(data=grade_assignment_dump)

@@ -120,7 +120,7 @@ def test_grade_assignment_bad_arguments(client, h_teacher_1):
     assert data['error'] == 'ValidationError'
 
 
-def test_grade_assignment_bad_url(client, h_teacher_2):
+def test_grade_assignment_bad_gateway(client, h_teacher_2):
     """
     failure case: If api url is wrong
     """
@@ -176,7 +176,7 @@ def test_grade_assignment_empty_header(client, h_teacher_1):
     assert data['error'] == 'FyleError'
 
 
-def test_grade_assignment_null_data(client, h_teacher_1):
+def test_grade_assignment_nulData(client, h_teacher_1):
     """
     failure case: If null data is provided
     """
@@ -207,7 +207,7 @@ def test_grade_assignment_wrong_method(client, h_teacher_1):
     assert data['error'] == 'MethodNotAllowed'
 
 
-def test_grade_assignment_perfect(client, h_teacher_1):
+def test_grade_assignment_allOk(client, h_teacher_1):
     """
     NO failure case: Everything is perfect
     """
@@ -220,5 +220,5 @@ def test_grade_assignment_perfect(client, h_teacher_1):
         }
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     data = response.json
